@@ -16,7 +16,7 @@ public class OrderResponse {
     private String company;
     private String symbol;
     private Integer quantity;
-    private double amount;
+    private Double amount;
     private String username;
 
     public OrderResponse(Order order) {
@@ -24,7 +24,7 @@ public class OrderResponse {
         this.company = order.getStock().getCompany();
         this.symbol = order.getStock().getSymbol();
         this.quantity = order.getQuantity();
-        this.amount = order.getQuantity();
+        this.amount = order.getAmount();
         this.username = order.getUser().getUsername();
     }
 }

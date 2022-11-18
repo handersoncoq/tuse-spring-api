@@ -44,6 +44,8 @@ public class OrderService {
             throw new InvalidUserInputException("No symbol was found");
         if(!invalidQuantityInput.test(orderRequest.getQuantity()) || orderRequest.getQuantity() == 0)
             throw new InvalidUserInputException("No quantity was found");
+        if(!invalidBuyingPriceInput.test(orderRequest.getBuyingPrice()))
+            throw new InvalidUserInputException("No buying price was found");
 
         Stock stock = stockService.getStockBySymbol(orderRequest.getSymbol());
         if(orderRequest.getQuantity() > stock.getTotalShares())
@@ -55,18 +57,18 @@ public class OrderService {
         Order order = new Order();
         order.setStock(stock);
         order.setQuantity(orderRequest.getQuantity());
-
-        if(invalidBuyingPriceInput.test(orderRequest.getBuyingPrice()) && orderRequest.getBuyingPrice() != 0){
-            order.setAmount(orderRequest.getQuantity() * orderRequest.getBuyingPrice());
-            updateMarketCap(stock, orderRequest.getQuantity(), orderRequest.getBuyingPrice());
-        } else order.setAmount(orderRequest.getQuantity() * stock.getPrice());
-
+        order.setAmount(orderRequest.getQuantity() * orderRequest.getBuyingPrice());
         order.setUser(user);
+
+        if(!Objects.equals(orderRequest.getBuyingPrice(), stock.getPrice()))
+            updateMarketCap(stock, orderRequest.getQuantity(), orderRequest.getBuyingPrice());
 
         return new OrderResponse(orderRepo.save(order));
     }
 
     public void updateMarketCap(Stock stock, int quantity, double buyingPrice){
+
+        if(buyingPrice == 0) throw new InvalidUserInputException("Invalid Buying Price");
 
         if (buyingPrice > stock.getPrice()){
             double excess = (buyingPrice - stock.getPrice())*quantity;

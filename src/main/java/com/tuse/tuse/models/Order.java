@@ -25,7 +25,7 @@ public class Order {
     @Column
     private Integer quantity;
     @Column
-    private double amount;
+    private Double amount;
     @ManyToOne
     @JoinColumn(name = "username")
     private User user;

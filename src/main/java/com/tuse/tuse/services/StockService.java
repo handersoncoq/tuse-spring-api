@@ -37,7 +37,7 @@ public class StockService {
 
     @Transactional
     public Stock getStockByCompany(String company){
-        return stockRepo.findStockBySymbol(company).orElseThrow(ResourceNotFoundException::new);
+        return stockRepo.findStockByCompany(company).orElseThrow(ResourceNotFoundException::new);
     }
 
     @Transactional

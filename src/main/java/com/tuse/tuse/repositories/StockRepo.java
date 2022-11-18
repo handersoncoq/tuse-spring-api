@@ -11,10 +11,10 @@ import java.util.Optional;
 @Repository
 public interface StockRepo extends JpaRepository<Stock, Long> {
 
-    @Query(value = "FROM Stock WHERE symbol = :symbol")
+    @Query(value = "FROM Stock WHERE lower(symbol) = lower(:symbol)")
     Optional<Stock> findStockBySymbol(String symbol);
 
-    @Query(value = "FROM Stock WHERE company = :company")
+    @Query(value = "FROM Stock WHERE lower(company) = lower(:company)")
     Optional<Stock> findStockByCompany(String company);
 
     @Query(value = "FROM Stock WHERE price >= :price")

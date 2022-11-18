@@ -27,13 +27,13 @@ public class StockController {
     @GetMapping("/symbol/{symbol}")
     public Stock getStockBySymbol(@PathVariable String symbol){
 
-        return stockService.getStockBySymbol(symbol);
+        return stockService.getStockBySymbol(symbol.trim());
     }
 
     @GetMapping("/company/{company}")
     public Stock getStockByCompany(@PathVariable String company){
 
-        return stockService.getStockByCompany(company);
+        return stockService.getStockByCompany(company.trim());
     }
 
     @GetMapping("/greaterThan/{price}")
