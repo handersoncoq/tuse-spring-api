@@ -72,6 +72,7 @@ public class OrderService {
             double excess = (buyingPrice - stock.getPrice())*quantity;
             double newMarketCap = stock.getMarketCap() + excess;
             stock.setPrice(newMarketCap / stock.getTotalShares());
+            stock.setMarketCap(newMarketCap);
             stockService.save(stock);
         }
 
@@ -79,6 +80,7 @@ public class OrderService {
             double deficit = (stock.getPrice() - buyingPrice)*quantity;
             double newMarketCap = stock.getMarketCap() - deficit ;
             stock.setPrice(newMarketCap / stock.getTotalShares());
+            stock.setMarketCap(newMarketCap);
             stockService.save(stock);
         }
 
