@@ -25,7 +25,7 @@ public class StockController {
     }
 
     @GetMapping("/symbol/{symbol}")
-    public Stock getStockBySymbol(@PathVariable String symbol){
+    public List<Stock> getStockBySymbol(@PathVariable String symbol){
 
         return stockService.getStockBySymbol(symbol.trim());
     }

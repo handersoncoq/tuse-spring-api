@@ -47,7 +47,7 @@ public class OrderService {
         if(!invalidBuyingPriceInput.test(orderRequest.getBuyingPrice()))
             throw new InvalidUserInputException("No buying price was found");
 
-        Stock stock = stockService.getStockBySymbol(orderRequest.getSymbol());
+        Stock stock = stockService.getStockBySymbol(orderRequest.getSymbol()).get(0);
         if(orderRequest.getQuantity() > stock.getTotalShares())
             throw new UnauthorizedException("Quantity exceeds the total shares available");
 
@@ -112,7 +112,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<OrderResponse> GetOrdersBySymbol(String symbol){
 
-        return orderRepo.findOrdersByCompany(symbol)
+        return orderRepo.findOrdersBySymbol(symbol)
                 .orElseThrow(ResourceNotFoundException::new);
     }
 
