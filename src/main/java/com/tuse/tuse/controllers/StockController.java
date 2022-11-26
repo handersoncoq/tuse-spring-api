@@ -1,6 +1,6 @@
 package com.tuse.tuse.controllers;
 
-import com.tuse.tuse.models.Stock;
+import com.tuse.tuse.responses.StockResponse;
 import com.tuse.tuse.services.StockService;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,31 +19,25 @@ public class StockController {
     }
 
     @GetMapping("/all")
-    public List<Stock> getAllStocks(){
+    public List<StockResponse> getAllStocks(){
 
         return stockService.getAllStocks();
     }
 
     @GetMapping("/symbol/{symbol}")
-    public List<Stock> getStockBySymbol(@PathVariable String symbol){
+    public List<StockResponse> getStockBySymbol(@PathVariable String symbol){
 
         return stockService.getStockBySymbol(symbol.trim());
     }
 
-    @GetMapping("/company/{company}")
-    public Stock getStockByCompany(@PathVariable String company){
-
-        return stockService.getStockByCompany(company.trim());
-    }
-
     @GetMapping("/greaterThan/{price}")
-    public List<Stock> filterByPriceGreaterThan(@PathVariable double price){
+    public List<StockResponse> filterByPriceGreaterThan(@PathVariable double price){
 
         return stockService.filterByPriceGreaterThan(price);
     }
 
     @GetMapping("/lowerThan/{price}")
-    public List<Stock> filterByPriceLowerThan(@PathVariable double price){
+    public List<StockResponse> filterByPriceLowerThan(@PathVariable double price){
 
         return stockService.filterByPriceLowerThan(price);
     }

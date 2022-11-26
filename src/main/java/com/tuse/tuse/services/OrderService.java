@@ -47,9 +47,9 @@ public class OrderService {
         if(!invalidBuyingPriceInput.test(orderRequest.getBuyingPrice()))
             throw new InvalidUserInputException("No buying price was found");
 
-        Stock stock = stockService.getStockBySymbol(orderRequest.getSymbol()).get(0);
-        if(orderRequest.getQuantity() > stock.getTotalShares())
-            throw new UnauthorizedException("Quantity exceeds the total shares available");
+        Stock stock = stockService.fetchStockBySymbol(orderRequest.getSymbol());
+        if(orderRequest.getQuantity() > stock.getCompany().getOutstandingShares())
+            throw new UnauthorizedException("Quantity exceeds total outstanding shares");
 
         User user = new User();
         userService.save(user);
@@ -72,17 +72,17 @@ public class OrderService {
 
         if (buyingPrice > stock.getPrice()){
             double excess = (buyingPrice - stock.getPrice())*quantity;
-            double newMarketCap = stock.getMarketCap() + excess;
-            stock.setPrice(newMarketCap / stock.getTotalShares());
-            stock.setMarketCap(newMarketCap);
+            double newMarketCap = stock.getCompany().getMarketCap() + excess;
+            stock.setPrice(newMarketCap / stock.getCompany().getOutstandingShares());
+            stock.getCompany().setMarketCap(newMarketCap);
             stockService.save(stock);
         }
 
         if (buyingPrice < stock.getPrice()){
             double deficit = (stock.getPrice() - buyingPrice)*quantity;
-            double newMarketCap = stock.getMarketCap() - deficit ;
-            stock.setPrice(newMarketCap / stock.getTotalShares());
-            stock.setMarketCap(newMarketCap);
+            double newMarketCap = stock.getCompany().getMarketCap() - deficit ;
+            stock.setPrice(newMarketCap / stock.getCompany().getOutstandingShares());
+            stock.getCompany().setMarketCap(newMarketCap);
             stockService.save(stock);
         }
 

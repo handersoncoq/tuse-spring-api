@@ -18,15 +18,22 @@ public class Stock {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "stock_id")
     private Long stockId;
-    @Column
-    private String company;
-    @Column
+
+    @OneToOne
     private String symbol;
+
+    @OneToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
+
     @Column
     private Double price;
-    @Column(name = "total_shares")
-    private Long totalShares;
-    @Column(name = "market_cap")
-    private double marketCap;
 
+    @Column
+    private Long volume;
+
+    public Stock(Company company) {
+        this.symbol = company.getSymbol();
+        this.price = company.getInitialPrice();
+    }
 }

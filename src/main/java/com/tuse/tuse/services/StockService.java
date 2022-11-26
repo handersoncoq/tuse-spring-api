@@ -2,12 +2,13 @@ package com.tuse.tuse.services;
 
 import com.tuse.tuse.models.Stock;
 import com.tuse.tuse.repositories.StockRepo;
+import com.tuse.tuse.responses.StockResponse;
 import com.tuse.tuse.utilities.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StockService {
@@ -24,23 +25,27 @@ public class StockService {
         return stockRepo.save(stock);
     }
 
-    public List<Stock> getAllStocks(){
-        return stockRepo.findAll();
+    public List<StockResponse> getAllStocks(){
+
+        return stockRepo.findAll()
+                .stream()
+                .map(StockResponse::new)
+                .collect(Collectors.toList());
     }
 
-    public List<Stock> getStockBySymbol(String symbol){
+    public List<StockResponse> getStockBySymbol(String symbol){
         return stockRepo.findStockBySymbol(symbol).orElseThrow(ResourceNotFoundException::new);
     }
 
-    public Stock getStockByCompany(String company){
-        return stockRepo.findStockByCompany(company).orElseThrow(ResourceNotFoundException::new);
+    public Stock fetchStockBySymbol(String symbol){
+        return stockRepo.getStockBySymbol(symbol).orElseThrow(ResourceNotFoundException::new);
     }
 
-    public List<Stock> filterByPriceGreaterThan(double price){
+    public List<StockResponse> filterByPriceGreaterThan(double price){
         return stockRepo.filterByPriceGreaterThan(price).orElseThrow(ResourceNotFoundException::new);
     }
 
-    public List<Stock> filterByPriceLowerThan(double price){
+    public List<StockResponse> filterByPriceLowerThan(double price){
         return stockRepo.filterByPriceLowerThan(price).orElseThrow(ResourceNotFoundException::new);
     }
 }
