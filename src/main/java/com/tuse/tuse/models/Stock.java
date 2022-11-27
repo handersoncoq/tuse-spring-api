@@ -19,7 +19,6 @@ public class Stock {
     @Column(name = "stock_id")
     private Long stockId;
 
-    @OneToOne
     private String symbol;
 
     @OneToOne

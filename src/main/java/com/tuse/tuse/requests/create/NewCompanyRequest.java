@@ -1,4 +1,4 @@
-package com.tuse.tuse.requests;
+package com.tuse.tuse.requests.create;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

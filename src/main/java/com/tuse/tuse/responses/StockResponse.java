@@ -1,6 +1,5 @@
 package com.tuse.tuse.responses;
 
-import com.tuse.tuse.models.Company;
 import com.tuse.tuse.models.Stock;
 import lombok.AllArgsConstructor;
 import lombok.Data;

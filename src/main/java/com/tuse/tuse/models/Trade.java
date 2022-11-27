@@ -1,6 +1,5 @@
 package com.tuse.tuse.models;
 
-import com.tuse.tuse.requests.OrderRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +12,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "orders")
 
-public class Order {
+public class Trade {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,8 +25,10 @@ public class Order {
     private Integer quantity;
     @Column
     private Double amount;
+    @Column
+    private String type;
     @ManyToOne
-    @JoinColumn(name = "username")
+    @JoinColumn(name = "user_id")
     private User user;
 
 }

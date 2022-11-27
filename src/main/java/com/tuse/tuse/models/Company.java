@@ -1,6 +1,6 @@
 package com.tuse.tuse.models;
 
-import com.tuse.tuse.requests.NewCompanyRequest;
+import com.tuse.tuse.requests.create.NewCompanyRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,6 +38,10 @@ public class Company {
 
     @Column
     private String sector;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User owner;
 
     @Column(name = "date_listed")
     private Date dateListed;
