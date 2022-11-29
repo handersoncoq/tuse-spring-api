@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 public class SellRequest {
 
     private String symbol;
-    private Double sellingPrice;
+    private Double lowerPrice;
+    private Double upperPrice;
     private Integer quantity;
 }

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 public class TradeResponse {
 
-    private Long orderId;
+    private Long tradeId;
     private String company;
     private String symbol;
     private Integer quantity;
@@ -20,7 +20,7 @@ public class TradeResponse {
     private String username;
 
     public TradeResponse(Trade trade) {
-        this.orderId = trade.getOrderId();
+        this.tradeId = trade.getTradeId();
         this.company = trade.getStock().getCompany().getName();
         this.symbol = trade.getStock().getSymbol();
         this.quantity = trade.getQuantity();

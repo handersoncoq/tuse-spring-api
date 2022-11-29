@@ -10,14 +10,14 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "orders")
+@Table(name = "trades")
 
 public class Trade {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id")
-    private Long orderId;
+    @Column(name = "trade_id")
+    private Long tradeId;
     @ManyToOne
     @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;

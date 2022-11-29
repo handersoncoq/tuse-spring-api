@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.HashMap;
 
 @Data
 @AllArgsConstructor
@@ -19,9 +20,15 @@ public class Portfolio {
     @Column(name = "portfolio_id")
     private Long portfolioId;
 
-    @OneToOne
+    @OneToMany
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column
+    private String stock;
+
+    @Column
+    private Integer quantity;
 
     @Column
     private Double value;
