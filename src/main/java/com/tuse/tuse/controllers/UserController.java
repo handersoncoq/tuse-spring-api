@@ -4,6 +4,7 @@ import com.tuse.tuse.models.User;
 import com.tuse.tuse.requests.NewUserRequest;
 import com.tuse.tuse.requests.UpdateUserRequest;
 import com.tuse.tuse.services.UserService;
+import com.tuse.tuse.utilities.InvalidUserInputException;
 import com.tuse.tuse.utilities.ResourcePersistenceException;
 import com.tuse.tuse.utilities.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,14 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public User signUp(@RequestBody NewUserRequest newUserRequest){
+    public String signUp(@RequestBody NewUserRequest newUserRequest){
 
-        return userService.signUp(newUserRequest);
+        try {
+            userService.signUp(newUserRequest);
+            return "Sign Up was successful";
+        } catch (InvalidUserInputException | ResourcePersistenceException e) {
+            return e.getMessage();
+        }
     }
 
     @PutMapping("/update")
@@ -45,7 +51,7 @@ public class UserController {
         User sessionUser = userService.getSessionUser();
         if(sessionUser != null){
             userService.deactivate(sessionUser);
-            userService.logOut();
+            userService.signOut();
             return "Your account has been deactivated";
         } else return "Unauthorized. Target user not logged in";
     }

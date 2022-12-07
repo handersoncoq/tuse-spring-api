@@ -63,7 +63,7 @@ public class UserService {
     // ----------------------------------------------------------------
 
     @Transactional
-    public User logIn(String username, String password){
+    public User signIn(String username, String password) throws InvalidUserInputException, ResourcePersistenceException{
         User user = getUserByUsername(username);
         if(password.equals(user.getPassword()) && user.isActive()) {
             setSessionUser(user);
@@ -78,7 +78,7 @@ public class UserService {
         return sessionUser;
     }
     @Transactional
-    public void logOut(){
+    public void signOut(){
         setSessionUser(null);
     }
 
