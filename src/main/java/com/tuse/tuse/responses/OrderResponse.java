@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 public class OrderResponse {
 
-
     private Long orderId;
     private String company;
     private String symbol;

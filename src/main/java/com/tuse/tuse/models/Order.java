@@ -1,6 +1,5 @@
 package com.tuse.tuse.models;
 
-import com.tuse.tuse.requests.OrderRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,7 +26,7 @@ public class Order {
     @Column
     private Double amount;
     @ManyToOne
-    @JoinColumn(name = "username")
+    @JoinColumn(name = "user_id")
     private User user;
 
 }

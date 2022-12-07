@@ -17,24 +17,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
 
     private final OrderRepo orderRepo;
     private final StockService stockService;
-    private final UserService userService;
 
     @Autowired
-    public OrderService(OrderRepo orderRepo, StockService stockService, UserService userService) {
+    public OrderService(OrderRepo orderRepo, StockService stockService) {
         this.orderRepo = orderRepo;
         this.stockService = stockService;
-        this.userService = userService;
     }
 
     @Transactional
-    public OrderResponse createOrder(OrderRequest orderRequest) throws InvalidUserInputException, ResourcePersistenceException{
+    public OrderResponse createOrder(OrderRequest orderRequest, User user) throws InvalidUserInputException, ResourcePersistenceException{
 
         Predicate<String> notNullOrEmpty = (str) -> str != null && !str.trim().equals("");
         Predicate<Integer> invalidQuantityInput = Objects::nonNull;
@@ -50,9 +50,6 @@ public class OrderService {
         Stock stock = stockService.getStockBySymbol(orderRequest.getSymbol()).get(0);
         if(orderRequest.getQuantity() > stock.getTotalShares())
             throw new UnauthorizedException("Quantity exceeds the total shares available");
-
-        User user = new User();
-        userService.save(user);
 
         Order order = new Order();
         order.setStock(stock);
@@ -89,10 +86,17 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResponse> getOrdersByUsername(String username){
-
-        return orderRepo.findOrdersByUsername(username)
+    public List<OrderResponse> findOrdersByUserId(Long userId){
+        List<Order> orders = orderRepo.findOrdersByUserId(userId)
                 .orElseThrow(ResourceNotFoundException::new);
+
+        List<OrderResponse> orderList = new ArrayList<>();
+
+        for(Order order : orders){
+            orderList.add(new OrderResponse(order));
+        }
+
+        return orderList;
     }
 
     @Transactional(readOnly = true)
@@ -111,15 +115,18 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderResponse> GetOrdersBySymbol(String symbol){
-
-        return orderRepo.findOrdersBySymbol(symbol)
-                .orElseThrow(ResourceNotFoundException::new);
+        List<OrderResponse> orders = findAllOrders();
+       return orders.stream()
+               .filter(order -> order.getSymbol().equalsIgnoreCase(symbol))
+               .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<OrderResponse> GetOrdersByCompany(String company){
-
-        return orderRepo.findOrdersByCompany(company)
-                .orElseThrow(ResourceNotFoundException::new);
+        List<OrderResponse> orders = findAllOrders();
+        return orders.stream()
+                .filter(order -> order.getCompany().equalsIgnoreCase(company))
+                .collect(Collectors.toList());
     }
+
 }
