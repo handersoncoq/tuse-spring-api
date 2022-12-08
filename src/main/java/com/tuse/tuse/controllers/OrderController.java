@@ -5,6 +5,8 @@ import com.tuse.tuse.requests.OrderRequest;
 import com.tuse.tuse.responses.OrderResponse;
 import com.tuse.tuse.services.OrderService;
 import com.tuse.tuse.services.UserService;
+import com.tuse.tuse.utilities.InvalidUserInputException;
+import com.tuse.tuse.utilities.ResourceNotFoundException;
 import com.tuse.tuse.utilities.ResourcePersistenceException;
 import com.tuse.tuse.utilities.UnauthorizedException;
 import org.springframework.http.HttpStatus;
@@ -30,15 +32,23 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public OrderResponse createOrder(@RequestBody OrderRequest orderRequest) {
-        User user = userService.getSessionUser();
-        if(user == null){
-            user = new User();
-            user.setUsername("Tu$eUser" + UUID.randomUUID().getLeastSignificantBits());
-            user.setPassword(String.valueOf(UUID.randomUUID()));
-            userService.save(user);
+    public String createOrder(@RequestBody OrderRequest orderRequest) {
+        try {
+            User user = userService.getSessionUser();
+            if(user == null){
+               User nonSubscriber = new User();
+                nonSubscriber.setUsername("Tu$eUser" + UUID.randomUUID().getLeastSignificantBits());
+                nonSubscriber.setPassword(String.valueOf(UUID.randomUUID().getLeastSignificantBits()));
+                userService.save(nonSubscriber);
+                orderService.save(orderRequest, nonSubscriber);
+                return "Success";
+            }
+            orderService.createOrder(orderRequest, user);
+            return "Success";
+        } catch (InvalidUserInputException | ResourcePersistenceException | UnauthorizedException |
+                 ResourceNotFoundException e) {
+            return e.getMessage();
         }
-        return orderService.createOrder(orderRequest, user);
     }
 
     @GetMapping()

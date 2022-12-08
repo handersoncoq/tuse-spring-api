@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
@@ -27,9 +28,12 @@ public class User {
     private boolean isAdmin = false;
     @Column(name = "is_active")
     private boolean isActive = true;
+    @Column(name = "join_date")
+    private Date joinDate;
 
     public User(NewUserRequest newUserRequest) {
         this.username = newUserRequest.getUsername();
         this.password = newUserRequest.getPassword();
+        this.joinDate = new Date();
     }
 }

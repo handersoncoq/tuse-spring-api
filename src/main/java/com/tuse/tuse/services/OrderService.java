@@ -1,5 +1,6 @@
 package com.tuse.tuse.services;
 
+import com.tuse.tuse.models.Account;
 import com.tuse.tuse.models.Order;
 import com.tuse.tuse.models.Stock;
 import com.tuse.tuse.models.User;
@@ -24,12 +25,14 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepo orderRepo;
+    private final AccountService acctService;
     private final StockService stockService;
 
     @Autowired
-    public OrderService(OrderRepo orderRepo, StockService stockService) {
+    public OrderService(OrderRepo orderRepo, StockService stockService, AccountService acctService) {
         this.orderRepo = orderRepo;
         this.stockService = stockService;
+        this.acctService = acctService;
     }
 
     @Transactional
@@ -53,8 +56,17 @@ public class OrderService {
         Order order = new Order();
         order.setStock(stock);
         order.setQuantity(orderRequest.getQuantity());
-        order.setAmount(orderRequest.getQuantity() * orderRequest.getBuyingPrice());
+
+        Double amount = orderRequest.getQuantity() * orderRequest.getBuyingPrice();
+        Account userAccount = acctService.getAccountByUserId(user.getUserId());
+        if(amount > userAccount.getBalance()) throw new UnauthorizedException("Insufficient fund");
+
+        order.setAmount(amount);
         order.setUser(user);
+
+        userAccount.setBalance(userAccount.getBalance()-amount);
+        acctService.save(userAccount);
+
 
         if(!Objects.equals(orderRequest.getBuyingPrice(), stock.getPrice()))
             updateMarketCap(stock, orderRequest.getQuantity(), orderRequest.getBuyingPrice());
@@ -126,6 +138,39 @@ public class OrderService {
         return orders.stream()
                 .filter(order -> order.getCompany().equalsIgnoreCase(company))
                 .collect(Collectors.toList());
+    }
+
+    // save order from non-subscribers
+    @Transactional
+    public OrderResponse save(OrderRequest orderRequest, User user) throws InvalidUserInputException, ResourcePersistenceException{
+
+
+        Predicate<String> notNullOrEmpty = (str) -> str != null && !str.trim().equals("");
+        Predicate<Integer> invalidQuantityInput = Objects::nonNull;
+        Predicate<Double> invalidBuyingPriceInput = Objects::nonNull;
+
+        if(!notNullOrEmpty.test(orderRequest.getSymbol()))
+            throw new InvalidUserInputException("No symbol was found");
+        if(!invalidQuantityInput.test(orderRequest.getQuantity()) || orderRequest.getQuantity() == 0)
+            throw new InvalidUserInputException("No quantity was found");
+        if(!invalidBuyingPriceInput.test(orderRequest.getBuyingPrice()))
+            throw new InvalidUserInputException("No buying price was found");
+
+        Stock stock = stockService.getStockBySymbol(orderRequest.getSymbol()).get(0);
+        if(orderRequest.getQuantity() > stock.getTotalShares())
+            throw new UnauthorizedException("Quantity exceeds the total shares available");
+
+        Order order = new Order();
+        order.setStock(stock);
+        order.setQuantity(orderRequest.getQuantity());
+
+        Double amount = orderRequest.getQuantity() * orderRequest.getBuyingPrice();
+
+        order.setAmount(amount);
+        order.setUser(user);
+
+        return new OrderResponse(orderRepo.save(order));
+
     }
 
 }

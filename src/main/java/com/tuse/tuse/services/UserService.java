@@ -1,5 +1,6 @@
 package com.tuse.tuse.services;
 
+import com.tuse.tuse.models.Account;
 import com.tuse.tuse.models.User;
 import com.tuse.tuse.repositories.UserRepo;
 import com.tuse.tuse.requests.UpdateUserRequest;
@@ -19,11 +20,13 @@ import java.util.function.Predicate;
 public class UserService {
 
     private final UserRepo userRepo;
+    private final AccountService acctService;
     private User sessionUser;
 
     @Autowired
-    public UserService(UserRepo userRepo) {
+    public UserService(UserRepo userRepo,AccountService acctService ) {
         this.userRepo = userRepo;
+        this.acctService = acctService;
     }
 
     @Transactional
@@ -37,7 +40,14 @@ public class UserService {
         if(userRepo.fetchUsername(newUserRequest.getUsername()).isPresent())
             throw new ResourcePersistenceException("Username is not available");
 
-        return userRepo.save(new User(newUserRequest));
+        User newUser = userRepo.save(new User(newUserRequest));
+
+        Account newUserAccount = new Account();
+        newUserAccount.setUser(newUser);
+        newUserAccount.setBalance(500.0);
+        acctService.save(newUserAccount);
+
+        return newUser;
     }
 
     @Transactional
