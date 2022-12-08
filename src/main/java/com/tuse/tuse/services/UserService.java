@@ -4,6 +4,7 @@ import com.tuse.tuse.models.User;
 import com.tuse.tuse.repositories.UserRepo;
 import com.tuse.tuse.requests.UpdateUserRequest;
 import com.tuse.tuse.requests.NewUserRequest;
+import com.tuse.tuse.utilities.InvalidCredentialsException;
 import com.tuse.tuse.utilities.InvalidUserInputException;
 import com.tuse.tuse.utilities.ResourceNotFoundException;
 import com.tuse.tuse.utilities.ResourcePersistenceException;
@@ -63,12 +64,12 @@ public class UserService {
     // ----------------------------------------------------------------
 
     @Transactional
-    public User signIn(String username, String password) throws InvalidUserInputException, ResourcePersistenceException{
+    public User signIn(String username, String password) throws InvalidCredentialsException, ResourceNotFoundException{
         User user = getUserByUsername(username);
         if(password.equals(user.getPassword()) && user.isActive()) {
             setSessionUser(user);
             return user;
-        } else throw new ResourceNotFoundException("Incorrect credentials");
+        } else throw new InvalidCredentialsException("Incorrect password");
     }
 
     public void setSessionUser(User sessionUser){
@@ -84,7 +85,7 @@ public class UserService {
 
     @Transactional
     public User getUserByUsername(String username){
-        return userRepo.fetchUsername(username).orElseThrow(ResourceNotFoundException::new);
+        return userRepo.fetchUsername(username).orElseThrow(InvalidCredentialsException::new);
     }
     @Transactional
     public void deactivate(User user){

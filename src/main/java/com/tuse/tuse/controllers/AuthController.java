@@ -1,10 +1,9 @@
 package com.tuse.tuse.controllers;
 
-import com.tuse.tuse.models.User;
 import com.tuse.tuse.requests.LoginRequest;
 import com.tuse.tuse.services.UserService;
-import com.tuse.tuse.utilities.InvalidUserInputException;
-import com.tuse.tuse.utilities.ResourcePersistenceException;
+import com.tuse.tuse.utilities.InvalidCredentialsException;
+import com.tuse.tuse.utilities.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +26,7 @@ public class AuthController {
         try {
             userService.signIn(creds.getUsername(), creds.getPassword());
             return "Success";
-        } catch (InvalidUserInputException | ResourcePersistenceException e) {
+        } catch (InvalidCredentialsException | ResourceNotFoundException e) {
             return e.getMessage();
         }
 
