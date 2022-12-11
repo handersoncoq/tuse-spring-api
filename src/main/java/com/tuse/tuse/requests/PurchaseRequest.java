@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class OrderRequest {
+public class PurchaseRequest {
 
     private String symbol;
     private Double buyingPrice;

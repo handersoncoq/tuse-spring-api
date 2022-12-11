@@ -32,6 +32,10 @@ public class StockService {
         return stockRepo.findStockBySymbol(symbol).orElseThrow(ResourceNotFoundException::new);
     }
 
+    public Stock getBySymbol(String symbol){
+        return stockRepo.findBySymbol(symbol).orElseThrow(ResourceNotFoundException::new);
+    }
+
     public Stock getStockByCompany(String company){
         return stockRepo.findStockByCompany(company).orElseThrow(ResourceNotFoundException::new);
     }

@@ -24,13 +24,13 @@ public class UserService {
     private User sessionUser;
 
     @Autowired
-    public UserService(UserRepo userRepo,AccountService acctService ) {
+    public UserService(UserRepo userRepo, AccountService acctService) {
         this.userRepo = userRepo;
         this.acctService = acctService;
     }
 
     @Transactional
-    public User signUp(NewUserRequest newUserRequest)throws InvalidUserInputException, ResourcePersistenceException {
+    public void signUp(NewUserRequest newUserRequest)throws InvalidUserInputException, ResourcePersistenceException {
 
         if(newUserRequest.getUsername() == null || newUserRequest.getUsername().equals(""))
             throw new InvalidUserInputException("Username was null or empty");
@@ -47,7 +47,6 @@ public class UserService {
         newUserAccount.setBalance(500.0);
         acctService.save(newUserAccount);
 
-        return newUser;
     }
 
     @Transactional
@@ -74,11 +73,10 @@ public class UserService {
     // ----------------------------------------------------------------
 
     @Transactional
-    public User signIn(String username, String password) throws InvalidCredentialsException, ResourceNotFoundException{
+    public void signIn(String username, String password) throws InvalidCredentialsException, ResourceNotFoundException{
         User user = getUserByUsername(username);
         if(password.equals(user.getPassword()) && user.isActive()) {
             setSessionUser(user);
-            return user;
         } else throw new InvalidCredentialsException("Incorrect password");
     }
 

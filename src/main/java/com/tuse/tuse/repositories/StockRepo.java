@@ -15,6 +15,9 @@ public interface StockRepo extends JpaRepository<Stock, Long> {
     @Query(value = "FROM Stock WHERE lower(symbol) = lower(:symbol)")
     Optional<List<Stock>> findStockBySymbol(@Param("symbol") String symbol);
 
+    @Query(value = "FROM Stock WHERE lower(symbol) = lower(:symbol)")
+    Optional<Stock> findBySymbol(@Param("symbol") String symbol);
+
     @Query(value = "FROM Stock WHERE lower(company) = lower(:company)")
     Optional<Stock> findStockByCompany(@Param("company") String company);
 

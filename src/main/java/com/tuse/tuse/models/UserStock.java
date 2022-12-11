@@ -10,21 +10,20 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "orders")
+@Table(name = "user_stocks")
 
-public class Order {
+public class UserStock {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id")
-    private Long orderId;
-    @ManyToOne
-    @JoinColumn(name = "stock_id", nullable = false)
-    private Stock stock;
+    @Column(name = "user_stocks_id")
+    private Long userStocksId;
+    @Column
+    private String symbol = "";
     @Column
     private Integer quantity;
-    @Column
-    private Double amount;
+    @Column(name ="upper_selling_price")
+    private Double priceToSell;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

@@ -28,5 +28,7 @@ public class Stock {
     private Long totalShares;
     @Column(name = "market_cap")
     private double marketCap;
+    @Column
+    private Long volume;
 
 }

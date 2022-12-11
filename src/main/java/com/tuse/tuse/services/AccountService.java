@@ -1,7 +1,9 @@
 package com.tuse.tuse.services;
 
 import com.tuse.tuse.models.Account;
+import com.tuse.tuse.models.User;
 import com.tuse.tuse.repositories.AccountRepo;
+import com.tuse.tuse.requests.PurchaseRequest;
 import com.tuse.tuse.utilities.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,13 +20,22 @@ public class AccountService {
     }
 
     @Transactional
-    public Account save(Account account){
-        return accountRepo.save(account);
+    public void save(Account account){
+        accountRepo.save(account);
     }
 
     @Transactional
-    public Account getAccountByUserId(Long userId){
-        return accountRepo.findAccountByUserId(userId).orElseThrow(ResourceNotFoundException::new);
+    public void updateUserAccount(User user, PurchaseRequest purchaseRequest){
+        Account userAccount = getUserAccount(user);
+        Double amount = purchaseRequest.getQuantity() * purchaseRequest.getBuyingPrice();
+        userAccount.setBalance(userAccount.getBalance()-amount);
+        save(userAccount);
+    }
+
+    @Transactional
+    public Account getUserAccount(User user){
+        if(user == null) throw new ResourceNotFoundException("No user was found");
+        return accountRepo.findAccountByUserId(user.getUserId()).orElseThrow(ResourceNotFoundException::new);
     }
 
     @Transactional
