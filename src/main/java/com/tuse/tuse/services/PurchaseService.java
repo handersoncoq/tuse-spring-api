@@ -69,35 +69,31 @@ public class PurchaseService {
             return;
         }
 
+        UserStock bestAvailableStock = userStocks.get(0);       // userStocks are ordered by priceToSell ascending
+
         Purchase purchase = new Purchase();
         purchase.setStock(stock);
         purchase.setQuantity(purchaseRequest.getQuantity());
 
-        Double amount = purchaseRequest.getQuantity() * purchaseRequest.getBuyingPrice();
+        Double amount = purchaseRequest.getQuantity() * bestAvailableStock.getPriceToSell();
         Account userAccount = acctService.getUserAccount(buyingUser);
         if(amount > userAccount.getBalance()) throw new UnauthorizedException("You do not have sufficient fund to execute this trade");
 
         purchase.setAmount(amount);
-        purchase.setBuyingPrice(purchaseRequest.getBuyingPrice());
+        purchase.setBuyingPrice(bestAvailableStock.getPriceToSell());
         purchase.setPurchaseDate(new Date());
         purchase.setUser(buyingUser);
 
         acctService.updatePurchaseUserAccount(buyingUser, purchaseRequest);
         userStockService.updateUserStock(buyingUser, purchaseRequest);
+        msgToUser(buyingUser, bestAvailableStock.getPriceToSell());
 
-        UserStock userStock = userStocks.get(0);
-        userStock.setQuantityOnSale(userStock.getQuantityOnSale() - quantity);
-        userStockService.save(userStock);
+        bestAvailableStock.setQuantityOnSale(bestAvailableStock.getQuantityOnSale() - quantity);
+        userStockService.save(bestAvailableStock);
 
-        User saleUser = userStock.getUser();
-        acctService.updateSaleUserAccount(saleUser, purchaseRequest);
-
-        Message msgToSaleUser = new Message();
-        msgToSaleUser.setTitle("Sale Update");
-        msgToSaleUser.setContent("Hooray! Your sale of the stock '"+symbol+"' has been completed, and your balance has been updated.");
-        msgToSaleUser.setToUser(saleUser);
-        msgToSaleUser.setSendDate(new Date());
-        msgService.save(msgToSaleUser);
+        User saleUser = bestAvailableStock.getUser();
+        acctService.updateSaleUserAccount(saleUser, amount);
+        msgToUser(saleUser, symbol);
 
         if(!Objects.equals(purchaseRequest.getBuyingPrice(), stock.getPrice()))
             updateMarketCap(stock, purchaseRequest.getQuantity(), purchaseRequest.getBuyingPrice());
@@ -105,6 +101,26 @@ public class PurchaseService {
         stockService.save(stock);
 
         purchaseRepo.save(purchase);
+    }
+
+    @Transactional
+    public void msgToUser(User saleUser, String symbol){
+        Message message = new Message();
+        message.setTitle("Sale Update");
+        message.setContent("Hooray! Your sale of the stock '"+symbol+"' has been completed, and your balance has been updated.");
+        message.setToUser(saleUser);
+        message.setSendDate(new Date());
+        msgService.save(message);
+    }
+
+    @Transactional
+    public void msgToUser(User buyingUser, Double price){
+        Message message = new Message();
+        message.setTitle("Purchase Update");
+        message.setContent("Hooray! Your purchase was executed at the best available price ($ " +price+")" );
+        message.setToUser(buyingUser);
+        message.setSendDate(new Date());
+        msgService.save(message);
     }
 
     @Transactional
