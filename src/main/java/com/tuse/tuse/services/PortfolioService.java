@@ -35,7 +35,7 @@ public class PortfolioService {
         if(user == null) throw new ResourceNotFoundException("No user was found");
 
         List<UserStock> userStockList = userStockRepo
-                .findUserStocksByUserId(user.getUserId())
+                .findNonZeroUserStocksByUserId(user.getUserId())
                 .orElseThrow(ResourceNotFoundException::new);
 
         List<HashMap<String, Object>> userPortfolio = new ArrayList<>();

@@ -25,10 +25,18 @@ public class AccountService {
     }
 
     @Transactional
-    public void updateUserAccount(User user, PurchaseRequest purchaseRequest){
-        Account userAccount = getUserAccount(user);
+    public void updatePurchaseUserAccount(User purchaseUser, PurchaseRequest purchaseRequest){
+        Account userAccount = getUserAccount(purchaseUser);
         Double amount = purchaseRequest.getQuantity() * purchaseRequest.getBuyingPrice();
-        userAccount.setBalance(userAccount.getBalance()-amount);
+        userAccount.setBalance(userAccount.getBalance() - amount);
+        save(userAccount);
+    }
+
+    @Transactional
+    public void updateSaleUserAccount(User saleUser, PurchaseRequest purchaseRequest){
+        Account userAccount = getUserAccount(saleUser);
+        Double amount = purchaseRequest.getQuantity() * purchaseRequest.getBuyingPrice();
+        userAccount.setBalance(userAccount.getBalance() + amount);
         save(userAccount);
     }
 

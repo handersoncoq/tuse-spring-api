@@ -10,15 +10,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserStockResponse {
 
-    private Long userStocksId;
+    private Long userStockId;
     private String symbol;
     private Integer quantity;
+    private Integer quantityOnSale;
     private Double priceToSell;
 
     public UserStockResponse(UserStock userStock) {
-        this.userStocksId = userStock.getUserStocksId();
+        this.userStockId = userStock.getUserStockId();
         this.symbol = userStock.getSymbol();
         this.quantity = userStock.getQuantity();
         this.priceToSell = userStock.getPriceToSell();
+        this.quantityOnSale = userStock.getQuantityOnSale();
     }
 }

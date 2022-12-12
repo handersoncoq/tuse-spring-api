@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,6 +19,7 @@ public class PurchaseResponse {
     private Integer quantity;
     private Double buyingPrice;
     private Double amount;
+    private Date purchaseDate;
     private String username;
 
     public PurchaseResponse(Purchase purchase) {
@@ -25,6 +28,7 @@ public class PurchaseResponse {
         this.symbol = purchase.getStock().getSymbol();
         this.quantity = purchase.getQuantity();
         this.amount = purchase.getAmount();
+        this.purchaseDate = purchase.getPurchaseDate();
         this.username = purchase.getUser().getUsername();
         this.buyingPrice = purchase.getBuyingPrice();
     }

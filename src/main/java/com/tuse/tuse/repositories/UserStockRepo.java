@@ -15,6 +15,12 @@ public interface UserStockRepo extends JpaRepository<UserStock, Long> {
     @Query(value = "FROM UserStock WHERE user_id = :userId")
     Optional<List<UserStock>> findUserStocksByUserId(@Param("userId") Long userId);
 
+    @Query(value = "FROM UserStock WHERE user_id = :userId AND quantity != 0")
+    Optional<List<UserStock>> findNonZeroUserStocksByUserId(@Param("userId") Long userId);
+
     @Query(value = "FROM UserStock WHERE user_id = :userId AND symbol = :symbol")
-    Optional<UserStock> findUserStocksByUserIdAndSymbol(@Param("userId") Long userId, @Param("symbol") String symbol);
+    Optional<UserStock> findUserStockByUserIdAndSymbol(@Param("userId") Long userId, @Param("symbol") String symbol);
+
+    @Query(value = "FROM UserStock WHERE symbol = :symbol AND quantity_on_sale >= :buyingQuantity AND price_to_sell <= :buyingPrice AND user_id != :buyingUserId")
+    List<UserStock> findUserStocksBySymbolQuantityPrice(@Param("symbol") String symbol, @Param("buyingQuantity") Integer buyingQuantity, @Param("buyingPrice") Double buyingPrice, @Param("buyingUserId") Long buyingUserId);
 }

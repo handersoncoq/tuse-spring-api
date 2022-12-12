@@ -28,10 +28,10 @@ public class UserStockService {
 
         UserStock userStock = new UserStock();
         if(userStockRepo
-                .findUserStocksByUserIdAndSymbol(user.getUserId(), purchaseRequest.getSymbol())
+                .findUserStockByUserIdAndSymbol(user.getUserId(), purchaseRequest.getSymbol())
                 .isPresent()) {
             userStock = userStockRepo
-                    .findUserStocksByUserIdAndSymbol(user.getUserId(), purchaseRequest.getSymbol())
+                    .findUserStockByUserIdAndSymbol(user.getUserId(), purchaseRequest.getSymbol())
                     .orElseThrow(ResourceNotFoundException::new);
             userStock.setQuantity(userStock.getQuantity() + purchaseRequest.getQuantity());
         } else{
@@ -62,5 +62,29 @@ public class UserStockService {
         UserStock userStock = userStockRepo.findById(userStockId).orElseThrow(ResourceNotFoundException::new);
         if(userStockList.contains(userStock)) return userStock;
         else throw new ResourceNotFoundException("This stock was not found in user's stock list");
+    }
+
+    @Transactional
+    public UserStock getUserStockByUserIdAndSymbol(User user, String symbol){
+
+        if(!userStockRepo.findUserStockByUserIdAndSymbol(user.getUserId(), symbol).isPresent()){
+            throw new ResourceNotFoundException("This stock does not exist in your portfolio");
+        }
+
+        return userStockRepo
+                .findUserStockByUserIdAndSymbol(user.getUserId(), symbol)
+                .orElseThrow(ResourceNotFoundException::new);
+    }
+
+    @Transactional
+    public void save(UserStock userStock){
+        userStockRepo.save(userStock);
+    }
+
+    @Transactional
+    public List<UserStock> getUserStocksBySymbolQuantityPrice(String symbol, Integer buyingQuantity, Double buyingPrice, Long buyingUserId){
+
+        return userStockRepo
+                .findUserStocksBySymbolQuantityPrice(symbol, buyingQuantity, buyingPrice, buyingUserId);
     }
 }

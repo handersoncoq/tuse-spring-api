@@ -26,17 +26,19 @@ public class PurchaseService {
     private final AccountService acctService;
     private final StockService stockService;
     private final UserStockService userStockService;
+    private final MessageService msgService;
 
     @Autowired
-    public PurchaseService(PurchaseRepo purchaseRepo, StockService stockService, AccountService acctService, UserStockService userStockService) {
+    public PurchaseService(PurchaseRepo purchaseRepo, StockService stockService, AccountService acctService, UserStockService userStockService, MessageService msgService) {
         this.purchaseRepo = purchaseRepo;
         this.stockService = stockService;
         this.acctService = acctService;
         this.userStockService = userStockService;
+        this.msgService = msgService;
     }
 
     @Transactional
-    public void execute(PurchaseRequest purchaseRequest, User user) throws InvalidUserInputException, ResourcePersistenceException{
+    public void execute(PurchaseRequest purchaseRequest, User buyingUser) throws InvalidUserInputException, ResourcePersistenceException{
 
         Predicate<String> notNullOrEmpty = (str) -> str != null && !str.trim().equals("");
         Predicate<Integer> invalidQuantityInput = Objects::nonNull;
@@ -49,9 +51,64 @@ public class PurchaseService {
         if(!invalidBuyingPriceInput.test(purchaseRequest.getBuyingPrice()))
             throw new InvalidUserInputException("No buying price was found");
 
-        Stock stock = stockService.getStockBySymbol(purchaseRequest.getSymbol()).get(0);
-        if(purchaseRequest.getQuantity() > stock.getTotalShares())
-            throw new UnauthorizedException("Quantity exceeds the total shares available");
+        String symbol = purchaseRequest.getSymbol();
+        Integer quantity = purchaseRequest.getQuantity();
+        Double buyingPrice = purchaseRequest.getBuyingPrice();
+        List<UserStock> userStocks = userStockService.getUserStocksBySymbolQuantityPrice(symbol, quantity, buyingPrice, buyingUser.getUserId());
+
+        Stock stock = stockService.getBySymbol(symbol);
+
+        if(userStocks.isEmpty()){
+            if(buyingPrice < (stock.getPrice() * 0.95))
+                throw new ResourceNotFoundException("No available trade matches your bid at this time");
+            if(purchaseRequest.getQuantity() > stock.getTotalShares())
+                throw new UnauthorizedException("Quantity exceeds the total shares available");
+
+            purchaseAtListingPrice(buyingUser, stock, purchaseRequest);
+
+            return;
+        }
+
+        Purchase purchase = new Purchase();
+        purchase.setStock(stock);
+        purchase.setQuantity(purchaseRequest.getQuantity());
+
+        Double amount = purchaseRequest.getQuantity() * purchaseRequest.getBuyingPrice();
+        Account userAccount = acctService.getUserAccount(buyingUser);
+        if(amount > userAccount.getBalance()) throw new UnauthorizedException("You do not have sufficient fund to execute this trade");
+
+        purchase.setAmount(amount);
+        purchase.setBuyingPrice(purchaseRequest.getBuyingPrice());
+        purchase.setPurchaseDate(new Date());
+        purchase.setUser(buyingUser);
+
+        acctService.updatePurchaseUserAccount(buyingUser, purchaseRequest);
+        userStockService.updateUserStock(buyingUser, purchaseRequest);
+
+        UserStock userStock = userStocks.get(0);
+        userStock.setQuantityOnSale(userStock.getQuantityOnSale() - quantity);
+        userStockService.save(userStock);
+
+        User saleUser = userStock.getUser();
+        acctService.updateSaleUserAccount(saleUser, purchaseRequest);
+
+        Message msgToSaleUser = new Message();
+        msgToSaleUser.setTitle("Sale Update");
+        msgToSaleUser.setContent("Hooray! Your sale of the stock '"+symbol+"' has been completed, and your balance has been updated.");
+        msgToSaleUser.setToUser(saleUser);
+        msgToSaleUser.setSendDate(new Date());
+        msgService.save(msgToSaleUser);
+
+        if(!Objects.equals(purchaseRequest.getBuyingPrice(), stock.getPrice()))
+            updateMarketCap(stock, purchaseRequest.getQuantity(), purchaseRequest.getBuyingPrice());
+        stock.setVolume(stock.getVolume() + purchaseRequest.getQuantity());
+        stockService.save(stock);
+
+        purchaseRepo.save(purchase);
+    }
+
+    @Transactional
+    public void purchaseAtListingPrice(User user, Stock stock, PurchaseRequest purchaseRequest){
 
         Purchase purchase = new Purchase();
         purchase.setStock(stock);
@@ -66,9 +123,8 @@ public class PurchaseService {
         purchase.setPurchaseDate(new Date());
         purchase.setUser(user);
 
-        acctService.updateUserAccount(user, purchaseRequest);
+        acctService.updatePurchaseUserAccount(user, purchaseRequest);
         userStockService.updateUserStock(user, purchaseRequest);
-
 
         if(!Objects.equals(purchaseRequest.getBuyingPrice(), stock.getPrice()))
             updateMarketCap(stock, purchaseRequest.getQuantity(), purchaseRequest.getBuyingPrice());
