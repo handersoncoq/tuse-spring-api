@@ -51,7 +51,7 @@ public class PurchaseService {
         if(!invalidBuyingPriceInput.test(purchaseRequest.getBuyingPrice()))
             throw new InvalidUserInputException("No buying price was found");
 
-        String symbol = purchaseRequest.getSymbol();
+        String symbol = purchaseRequest.getSymbol().toUpperCase();
         Integer quantity = purchaseRequest.getQuantity();
         Double buyingPrice = purchaseRequest.getBuyingPrice();
         List<UserStock> userStocks = userStockService.getUserStocksBySymbolQuantityPrice(symbol, quantity, buyingPrice, buyingUser.getUserId());
@@ -155,18 +155,24 @@ public class PurchaseService {
         if(buyingPrice == 0) throw new InvalidUserInputException("Invalid Buying Price");
 
         if (buyingPrice > stock.getPrice()){
-            double excess = (buyingPrice - stock.getPrice())*quantity;
+            Double currentPrice = stock.getPrice();
+            double excess = (buyingPrice - currentPrice)*quantity;
             double newMarketCap = stock.getMarketCap() + excess;
-            stock.setPrice(newMarketCap / stock.getTotalShares());
+            Double newPrice = newMarketCap / stock.getTotalShares();
+            stock.setPrice(newPrice);
             stock.setMarketCap(newMarketCap);
+            stock.setTrend(( (newPrice/currentPrice) - 1)*100);
             stockService.save(stock);
         }
 
         if (buyingPrice < stock.getPrice()){
-            double deficit = (stock.getPrice() - buyingPrice)*quantity;
+            Double currentPrice = stock.getPrice();
+            double deficit = (currentPrice - buyingPrice)*quantity;
             double newMarketCap = stock.getMarketCap() - deficit ;
-            stock.setPrice(newMarketCap / stock.getTotalShares());
+            Double newPrice = newMarketCap / stock.getTotalShares();
+            stock.setPrice(newPrice);
             stock.setMarketCap(newMarketCap);
+            stock.setTrend(( (newPrice/currentPrice) - 1)*100);
             stockService.save(stock);
         }
 

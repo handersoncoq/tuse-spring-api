@@ -24,6 +24,8 @@ public class Stock {
     private String symbol;
     @Column
     private Double price;
+    @Column
+    private Double trend;
     @Column(name = "total_shares")
     private Long totalShares;
     @Column(name = "market_cap")

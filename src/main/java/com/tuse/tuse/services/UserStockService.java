@@ -26,16 +26,18 @@ public class UserStockService {
     @Transactional
     public void updateUserStock(User user, PurchaseRequest purchaseRequest){
 
+        String symbol = purchaseRequest.getSymbol().toUpperCase();
+
         UserStock userStock = new UserStock();
         if(userStockRepo
-                .findUserStockByUserIdAndSymbol(user.getUserId(), purchaseRequest.getSymbol())
+                .findUserStockByUserIdAndSymbol(user.getUserId(), symbol)
                 .isPresent()) {
             userStock = userStockRepo
-                    .findUserStockByUserIdAndSymbol(user.getUserId(), purchaseRequest.getSymbol())
+                    .findUserStockByUserIdAndSymbol(user.getUserId(), symbol)
                     .orElseThrow(ResourceNotFoundException::new);
             userStock.setQuantity(userStock.getQuantity() + purchaseRequest.getQuantity());
         } else{
-            userStock.setSymbol(purchaseRequest.getSymbol());
+            userStock.setSymbol(symbol);
             userStock.setQuantity(purchaseRequest.getQuantity());
             userStock.setUser(user);
         }

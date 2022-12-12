@@ -2,6 +2,7 @@ package com.tuse.tuse.controllers;
 
 import com.tuse.tuse.models.User;
 import com.tuse.tuse.requests.SaleRequest;
+import com.tuse.tuse.requests.UpdateSaleRequest;
 import com.tuse.tuse.responses.SaleResponse;
 import com.tuse.tuse.services.SaleService;
 import com.tuse.tuse.services.UserService;
@@ -46,7 +47,7 @@ public class SaleController {
     public List<SaleResponse> getSalesByUser(){
         User user = userService.getSessionUser();
         if(user==null) throw new ResourcePersistenceException("No user was found");
-        return saleService.findSalesByUserId(user.getUserId());
+        return saleService.getSalesByUserId(user.getUserId());
     }
 
     @GetMapping("/all")
@@ -71,6 +72,18 @@ public class SaleController {
         if(user==null) throw new ResourcePersistenceException("No user was found");
         if(!user.isAdmin()) throw new UnauthorizedException("User not admin");
         return saleService.getSalesByCompany(company.trim());
+    }
+
+    @PutMapping
+    public String updateSellingPrice(@RequestBody UpdateSaleRequest updateRequest){
+        try {
+            User user = userService.getSessionUser();
+            saleService.updateSellingPrice(user, updateRequest);
+            return "Update has been successful";
+        } catch (InvalidUserInputException | ResourcePersistenceException | UnauthorizedException |
+                 ResourceNotFoundException e) {
+            return e.getMessage();
+        }
     }
 }
 

@@ -15,6 +15,9 @@ public interface SaleRepo extends JpaRepository<Sale, Long> {
     @Query(value = "FROM Sale WHERE user_id = :userId")
     Optional<List<Sale>> findSalesByUserId(@Param("userId") Long userId);
 
+    @Query(value = "FROM Sale WHERE user_id = :userId AND sale_id = :saleId")
+    Optional<Sale> findSalesByUserIdAndSaleId(@Param("userId") Long userId, @Param("saleId") Long saleId);
+
     @Query(value = "FROM Sale WHERE user_id = :userId AND stock_id = :stockId")
     Optional<List<Sale>> findSalesByUserIdAndSymbol(@Param("userId") Long userId, @Param("stockId") Long stockId);
 

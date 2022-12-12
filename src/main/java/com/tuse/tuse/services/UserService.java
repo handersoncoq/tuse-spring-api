@@ -77,7 +77,9 @@ public class UserService {
         User user = getUserByUsername(username);
         if(password.equals(user.getPassword()) && user.isActive()) {
             setSessionUser(user);
-        } else throw new InvalidCredentialsException("Incorrect password");
+        } else if(!user.isActive())
+            throw new InvalidCredentialsException();
+        else throw new InvalidCredentialsException("Incorrect password");
     }
 
     public void setSessionUser(User sessionUser){

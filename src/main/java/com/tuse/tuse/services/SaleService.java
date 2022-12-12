@@ -3,6 +3,7 @@ package com.tuse.tuse.services;
 import com.tuse.tuse.models.*;
 import com.tuse.tuse.repositories.SaleRepo;
 import com.tuse.tuse.requests.SaleRequest;
+import com.tuse.tuse.requests.UpdateSaleRequest;
 import com.tuse.tuse.responses.SaleResponse;
 import com.tuse.tuse.utilities.InvalidUserInputException;
 import com.tuse.tuse.utilities.ResourceNotFoundException;
@@ -49,7 +50,9 @@ public class SaleService {
         if(!nonNullBuyingPrice.test(saleRequest.getSellingPrice()))
             throw new InvalidUserInputException("No buying price was found");
 
-        UserStock userStock = userStockService.getUserStockByUserIdAndSymbol(user, saleRequest.getSymbol());
+        String symbol = saleRequest.getSymbol().toUpperCase();
+
+        UserStock userStock = userStockService.getUserStockByUserIdAndSymbol(user, symbol);
 
         if(saleRequest.getQuantity() > userStock.getQuantity())
             throw new InvalidUserInputException("You do not have enough shares for this sale");
@@ -60,7 +63,7 @@ public class SaleService {
         sale.setStock(stock);
         sale.setQuantity(saleRequest.getQuantity());
         sale.setSellingPrice(saleRequest.getSellingPrice());
-        sale.setAmount(saleRequest.getSellingPrice() * saleRequest.getQuantity());
+        sale.setAmount(saleRequest.getQuantity() * saleRequest.getSellingPrice());
         sale.setSaleDate(new Date());
         sale.setUser(user);
 
@@ -84,7 +87,7 @@ public class SaleService {
     }
 
     @Transactional(readOnly = true)
-    public List<SaleResponse> findSalesByUserId(Long userId){
+    public List<SaleResponse> getSalesByUserId(Long userId){
         List<Sale> sales = saleRepo.findSalesByUserId(userId)
                 .orElseThrow(ResourceNotFoundException::new);
 
@@ -97,10 +100,6 @@ public class SaleService {
         return saleList;
     }
 
-    @Transactional
-    public List<Sale> getSalesByUserId(Long userId){
-        return saleRepo.findSalesByUserId(userId).orElseThrow(ResourceNotFoundException::new);
-    }
 
     @Transactional
     public List<Sale> getSalesByUserIdAndSymbol(Long userId, String symbol){
@@ -137,6 +136,43 @@ public class SaleService {
         return allSales.stream()
                 .filter(purchase -> purchase.getCompany().equalsIgnoreCase(company))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Sale getSalesByUserIdAndSaleId(Long userId, Long saleId){
+        return saleRepo
+                .findSalesByUserIdAndSaleId(userId, saleId)
+                .orElseThrow(ResourceNotFoundException::new);
+    }
+
+    // update sale
+
+    @Transactional
+    public void updateSellingPrice(User user, UpdateSaleRequest updateRequest) throws InvalidUserInputException, ResourcePersistenceException{
+
+        if(user == null) throw new ResourceNotFoundException("No sign-in user found");
+
+        Predicate<Double> nonNullDouble = Objects::nonNull;
+        Predicate<Long> nonNullLong = Objects::nonNull;
+
+        if(!nonNullLong.test(updateRequest.getSaleId()))
+            throw new InvalidUserInputException("Sale Id needed");
+        if(!nonNullDouble.test(updateRequest.getNewSellingPrice()))
+            throw new InvalidUserInputException("No selling price was found");
+
+        Sale foundSale = saleRepo
+                .findSalesByUserIdAndSaleId(user.getUserId(), updateRequest.getSaleId())
+                .orElseThrow(ResourceNotFoundException::new);
+        UserStock userStock = userStockService.getUserStockByUserIdAndSymbol(user, foundSale.getStock().getSymbol());
+        if(userStock.getQuantityOnSale() == 0) throw new ResourceNotFoundException("This sale has already been executed. Submit another trade");
+
+        foundSale.setSellingPrice(updateRequest.getNewSellingPrice());
+        foundSale.setAmount(foundSale.getQuantity() * updateRequest.getNewSellingPrice());
+        saleRepo.save(foundSale);
+
+        userStock.setPriceToSell(updateRequest.getNewSellingPrice());
+        userStockService.save(userStock);
+
     }
 
 }
