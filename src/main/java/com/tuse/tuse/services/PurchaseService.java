@@ -59,12 +59,17 @@ public class PurchaseService {
         Stock stock = stockService.getBySymbol(symbol);
 
         if(userStocks.isEmpty()){
-            if(buyingPrice < (stock.getPrice() * 0.95))
-                throw new ResourceNotFoundException("No available trade matches your bid at this time");
-            if(purchaseRequest.getQuantity() > stock.getTotalShares())
-                throw new UnauthorizedException("Quantity exceeds the total shares available");
+            // this ensures that a user is able to buy a stock at a lower price than the listing price
+            // if certain conditions are met
+            boolean priceQuantityConditionMet= (quantity >= stock.getFavorableQuantity() && buyingPrice >= stock.getPrice() * stock.getPercentOfPriceToSell());
 
-            purchaseAtListingPrice(buyingUser, stock, purchaseRequest);
+            if(priceQuantityConditionMet || buyingPrice >= stock.getPrice()){
+
+                if(purchaseRequest.getQuantity() > stock.getTotalShares()) throw new UnauthorizedException("Quantity exceeds the total shares available");
+
+                purchaseAtListingPrice(buyingUser, stock, purchaseRequest);
+
+            } else throw new ResourceNotFoundException("No available trade matches your bid at this time");
 
             return;
         }

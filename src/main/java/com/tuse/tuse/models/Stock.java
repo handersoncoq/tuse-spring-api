@@ -24,6 +24,10 @@ public class Stock {
     private String symbol;
     @Column
     private Double price;
+    @Column(name = "percent_of_price_to_sell")
+    private Double percentOfPriceToSell;
+    @Column(name = "favorable_quantity")
+    private Integer favorableQuantity;
     @Column
     private Double trend;
     @Column(name = "total_shares")
