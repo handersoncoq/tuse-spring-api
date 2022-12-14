@@ -49,4 +49,10 @@ public class UserStockController {
         return portfolioService.getUserPortfolio(user);
     }
 
+    @GetMapping("/{symbol}")
+    public UserStock getUserStockByUserIdAndSymbol(@PathVariable String symbol){
+        User user = userService.getSessionUser();
+        return userStockService.getUserStockByUserIdAndSymbol(user, symbol);
+    }
+
 }

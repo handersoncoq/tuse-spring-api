@@ -101,7 +101,7 @@ public class PurchaseService {
         msgToUser(saleUser, symbol);
 
         if(!Objects.equals(purchaseRequest.getBuyingPrice(), stock.getPrice()))
-            updateMarketCap(stock, purchaseRequest.getQuantity(), purchaseRequest.getBuyingPrice());
+            updateStockData(stock, purchaseRequest.getQuantity(), purchaseRequest.getBuyingPrice());
         stock.setVolume(stock.getVolume() + purchaseRequest.getQuantity());
         stockService.save(stock);
 
@@ -148,14 +148,14 @@ public class PurchaseService {
         userStockService.updateUserStock(user, purchaseRequest);
 
         if(!Objects.equals(purchaseRequest.getBuyingPrice(), stock.getPrice()))
-            updateMarketCap(stock, purchaseRequest.getQuantity(), purchaseRequest.getBuyingPrice());
+            updateStockData(stock, purchaseRequest.getQuantity(), purchaseRequest.getBuyingPrice());
         stock.setVolume(stock.getVolume() + purchaseRequest.getQuantity());
         stockService.save(stock);
 
         purchaseRepo.save(purchase);
     }
 
-    public void updateMarketCap(Stock stock, int quantity, double buyingPrice){
+    public void updateStockData(Stock stock, int quantity, double buyingPrice){
 
         if(buyingPrice == 0) throw new InvalidUserInputException("Invalid Buying Price");
 
