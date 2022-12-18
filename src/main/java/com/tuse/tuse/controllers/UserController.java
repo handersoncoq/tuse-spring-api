@@ -39,10 +39,17 @@ public class UserController {
 
     @PutMapping("/update")
     @ResponseStatus(value = HttpStatus.OK)
-    public User update(@RequestBody UpdateUserRequest updateRequest){
-        User sessionUser = userService.getSessionUser();
-        if(sessionUser != null) return userService.update(updateRequest, sessionUser);
-        else throw new UnauthorizedException("Unauthorized. Target user not logged in");
+    public String update(@RequestBody UpdateUserRequest updateRequest){
+        try {
+            User sessionUser = userService.getSessionUser();
+            if(sessionUser != null) {
+                userService.update(updateRequest, sessionUser);
+                return "You have successfully updated your account";
+            }
+            else throw new UnauthorizedException("Unauthorized. Target user not logged in");
+        } catch (InvalidUserInputException | ResourcePersistenceException | UnauthorizedException e) {
+            return e.getMessage();
+        }
     }
 
     @PutMapping("/deactivate")
