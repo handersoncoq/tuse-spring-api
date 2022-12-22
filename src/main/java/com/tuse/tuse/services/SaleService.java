@@ -37,7 +37,7 @@ public class SaleService {
     @Transactional
     public void execute(SaleRequest saleRequest, User user) throws InvalidUserInputException, ResourcePersistenceException{
 
-        if(user == null) throw new ResourceNotFoundException("No sign-in user found");
+        if(user == null) throw new ResourceNotFoundException("You want to be able to trade? Sign Up!");
 
         Predicate<String> notNullOrEmpty = (str) -> str != null && !str.trim().equals("");
         Predicate<Integer> nonNullQuantity = Objects::nonNull;
