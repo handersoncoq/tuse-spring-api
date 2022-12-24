@@ -1,6 +1,7 @@
 package com.tuse.tuse.services;
 
 import com.tuse.tuse.models.Account;
+import com.tuse.tuse.models.Message;
 import com.tuse.tuse.models.User;
 import com.tuse.tuse.repositories.UserRepo;
 import com.tuse.tuse.requests.UpdateUserRequest;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -21,12 +23,14 @@ public class UserService {
 
     private final UserRepo userRepo;
     private final AccountService acctService;
+    private final MessageService msgService;
     private User sessionUser;
 
     @Autowired
-    public UserService(UserRepo userRepo, AccountService acctService) {
+    public UserService(UserRepo userRepo, AccountService acctService, MessageService msgService) {
         this.userRepo = userRepo;
         this.acctService = acctService;
+        this.msgService = msgService;
     }
 
     @Transactional
@@ -47,6 +51,13 @@ public class UserService {
         newUserAccount.setBalance(500.0);
         acctService.save(newUserAccount);
 
+        Message newMsg = new Message();
+        newMsg.setTitle("Welcome!");
+        newMsg.setContent("Welcome to TU$E! A little something has been added to your account to get you started. " +
+                "Check your balance (dashboard -> account -> balance)");
+        newMsg.setSendDate(new Date());
+        newMsg.setToUser(newUser);
+        msgService.save(newMsg);
     }
 
     @Transactional

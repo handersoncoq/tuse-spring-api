@@ -4,10 +4,7 @@ import com.tuse.tuse.models.User;
 import com.tuse.tuse.responses.MessageResponse;
 import com.tuse.tuse.services.MessageService;
 import com.tuse.tuse.services.UserService;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,5 +31,16 @@ public class MessageController {
                 .stream()
                 .map(MessageResponse::new)
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/count/unRead")
+    public Integer getNumberOfUnReadMessages(){
+        User user = userService.getSessionUser();
+        return messageService.getNumberOfUnReadMessages(user);
+    }
+
+    @PutMapping("/isRead/{msgId}")
+    public void update(@PathVariable Long msgId){
+        messageService.update(msgId);
     }
 }

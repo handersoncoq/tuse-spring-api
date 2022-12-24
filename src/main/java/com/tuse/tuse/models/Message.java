@@ -28,5 +28,7 @@ public class Message {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User toUser;
+    @Column(name = "is_read")
+    private boolean isRead = false;
 
 }

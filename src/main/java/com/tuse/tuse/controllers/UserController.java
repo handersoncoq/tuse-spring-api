@@ -1,8 +1,10 @@
 package com.tuse.tuse.controllers;
 
+import com.tuse.tuse.models.Message;
 import com.tuse.tuse.models.User;
 import com.tuse.tuse.requests.NewUserRequest;
 import com.tuse.tuse.requests.UpdateUserRequest;
+import com.tuse.tuse.services.MessageService;
 import com.tuse.tuse.services.UserService;
 import com.tuse.tuse.utilities.InvalidUserInputException;
 import com.tuse.tuse.utilities.ResourcePersistenceException;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -19,7 +22,6 @@ import java.util.List;
 
 public class UserController {
     private final UserService userService;
-
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
@@ -31,7 +33,7 @@ public class UserController {
 
         try {
             userService.signUp(newUserRequest);
-            return "Sign Up was successful";
+            return "Sign Up was successful. Sign in and check your inbox!";
         } catch (InvalidUserInputException | ResourcePersistenceException e) {
             return e.getMessage();
         }
