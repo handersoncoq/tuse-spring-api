@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface MessageRepo extends JpaRepository<Message, Long> {
 
-    @Query(value = "FROM Message WHERE user_id = :userId")
+    @Query(value = "FROM Message WHERE user_id = :userId ORDER BY sendDate DESC")
     List<Message> findMessagesByUserId(@Param("userId") Long userId);
 
 }
