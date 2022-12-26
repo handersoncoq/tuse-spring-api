@@ -43,4 +43,10 @@ public class MessageController {
     public void update(@PathVariable Long msgId){
         messageService.update(msgId);
     }
+
+    @GetMapping("/{msgId}")
+    public MessageResponse getMessageById(@PathVariable Long msgId){
+
+        return messageService.getMessageById(msgId);
+    }
 }

@@ -3,6 +3,7 @@ package com.tuse.tuse.services;
 import com.tuse.tuse.models.Message;
 import com.tuse.tuse.models.User;
 import com.tuse.tuse.repositories.MessageRepo;
+import com.tuse.tuse.responses.MessageResponse;
 import com.tuse.tuse.utilities.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,5 +46,8 @@ public class MessageService {
                 .filter((message -> !message.isRead())).count();
     }
 
-
+    public MessageResponse getMessageById(Long msgId){
+        Message msg = messageRepo.findById(msgId).orElseThrow(ResourceNotFoundException::new);
+        return new MessageResponse(msg);
+    }
 }
